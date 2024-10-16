@@ -1,0 +1,51 @@
+name: UsernameCheckerLint
+
+on:
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "username_checker/**"
+      - "tests/**"
+  push:
+    branches:
+      - "*"
+    paths:
+      - "username_checker/**"
+      - "tests/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+          cache-dependency-path: poetry.lock
+      - name: Install dependencies
+        run: poetry install --with test
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+          cache-dependency-path: poetry.lock
+      - name: ruff
+        run: poetry run ruff check .
+      - name: mypy
+        run: |
+          export MYPYPATH=$(pwd)/username_checker/stubs
+          echo $MYPYPATH
+          poetry run mypy . --exclude username_checker/stubs/

@@ -1,0 +1,96 @@
+[tool.poetry]
+name = "username-checker"
+version = "0.1.0"
+description = ""
+authors = ["NezBut <xyi12312354@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = "^3.13.1"
+dishka = "^1.3.0"
+structlog = "^24.4.0"
+dynaconf = "^3.2.6"
+taskiq = "^0.11.7"
+taskiq-nats = "^0.4.0"
+taskiq-redis = "^1.0.2"
+sqlalchemy = "^2.0.36"
+alembic = "^1.13.3"
+fluentogram = "^1.1.7"
+asyncpg = "^0.29.0"
+adaptix = "^3.0.0b8"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+mypy = "^1.12.0"
+ruff = "^0.6.9"
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[tool.ruff]
+src = ["username_checker"]
+line-length = 160
+target-version = "py311"
+format.indent-style = "space"
+indent-width = 4
+
+include = ["username_checker/**.py", "tests/**.py"]
+
+lint.select = [
+    "ALL"
+]
+lint.ignore = [
+    "ARG",
+    "ANN",
+    "D212",
+    "D400",
+    "D401",
+    "D415",
+    "D210",
+    "D104",
+    "D100",
+    "D107",
+    "EM101",
+    "EM102",
+    "PT001",
+    "PT023",
+    "SIM108",
+    "SIM114",
+    "TRY003",
+    "PLW2901",
+    "RET505",
+    "PLR0913",
+    "UP038",
+    "TCH001",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "G004",
+    "INP001",
+    "UP007",
+    "PYI013",
+    "PIE790",
+    "D211",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["TID252", "PLR2004", "S101"]
+
+[tool.ruff.lint.isort]
+no-lines-before = ["local-folder"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

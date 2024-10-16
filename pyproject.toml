@@ -19,6 +19,7 @@ alembic = "^1.13.3"
 fluentogram = "^1.1.7"
 asyncpg = "^0.29.0"
 adaptix = "^3.0.0b8"
+types-cachetools = "^5.5.0.20240820"
 
 [tool.poetry.group.test]
 optional = true

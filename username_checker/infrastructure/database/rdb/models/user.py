@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from username_checker.core.entities.user import LanguageLocale, User
 from username_checker.infrastructure.database.rdb.models.base import Base, created_now, id_int
+
+if TYPE_CHECKING:
+    from username_checker.infrastructure.database.rdb.models.subscription import SubscriptionORM
+    from username_checker.infrastructure.database.rdb.models.username import UsernameORM
 
 
 class UserORM(Base[User]):
@@ -21,6 +26,14 @@ class UserORM(Base[User]):
     is_banned: Mapped[bool] = mapped_column(nullable=False, default=False)
     language: Mapped[LanguageLocale] = mapped_column(
         Enum(LanguageLocale), nullable=False,
+    )
+
+    subscriptions: Mapped[list["SubscriptionORM"]] = relationship(
+        back_populates="subscriber",
+    )
+    used_usernames: Mapped[list["UsernameORM"]] = relationship(
+        back_populates="used_usernames_by",
+        secondary="username_user_assoc",
     )
 
     def to_entity(self) -> User:

@@ -39,4 +39,4 @@ class JSONFileUsernameUploader(UsernameUploader):
         return path
 
     def _default_file_name_generator(self) -> FileNameGenerator:
-        return lambda: f"usernames_{datetime.now(UTC).strftime("%d.%m.%Y_%H_%M_%S")}.json"
+        return lambda: f"usernames_{datetime.now(UTC).strftime('%d.%m.%Y_%H_%M_%S')}.json"

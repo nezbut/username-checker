@@ -106,14 +106,16 @@ async def get_available_usernames_for_user(user: User, getter: interfaces.Userna
     return await getter.get_available_usernames_for_user(user)
 
 
-async def have_used(user: User, inspector: interfaces.UsernameInspector) -> bool:
+async def have_used(user: User, username: Username, inspector: interfaces.UsernameInspector) -> bool:
     """
     Checks if a user has used a username.
 
     :param user: The user to check.
     :type user: User
+    :param username: The username
+    :type username: Username
     :param inspector: The inspector to use for checking the username.
     :type inspector: interfaces.UsernameInspector
     :return: bool
     """
-    return await inspector.have_used(user)
+    return await inspector.have_used(user, username)

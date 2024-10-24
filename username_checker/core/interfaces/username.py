@@ -25,12 +25,14 @@ class UsernameInspector(Protocol):
 
     """A protocol for inspecting usernames."""
 
-    async def have_used(self, user: User) -> bool:
+    async def have_used(self, user: User, username: Username) -> bool:
         """
         Checks if a user has used a username.
 
         :param user: The user to check.
         :type user: User
+        :param username: The username
+        :type username: Username
         :return: bool
         """
         ...

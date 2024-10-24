@@ -34,7 +34,7 @@ async def delete_subscription(subscription_id: UUID, deleter: interfaces.Subscri
     return await deleter.delete(subscription_id)
 
 
-async def get_by_username(username: Username, getter: interfaces.SubscriptionGetter) -> Subscription:
+async def get_by_username(username: Username, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
     """
     Gets a subscription by username using the provided getter.
 
@@ -48,7 +48,7 @@ async def get_by_username(username: Username, getter: interfaces.SubscriptionGet
     return await getter.get_by_username(username)
 
 
-async def get_by_id(subscription_id: UUID, getter: interfaces.SubscriptionGetter) -> Subscription:
+async def get_by_id(subscription_id: UUID, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
     """
     Gets a subscription by ID using the provided getter.
 
@@ -76,15 +76,15 @@ async def get_subscriptions(getter: interfaces.SubscriptionGetter, subscription_
     return await getter.get_subscriptions(subscription_ids)
 
 
-async def get_by_user(user: User, getter: interfaces.SubscriptionGetter) -> list[Subscription]:
+async def get_by_subscriber(subscriber: User, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
     """
-    Gets all subscriptions by a user using the provided getter.
+    Get subscription by a subscriber.
 
-    :param user: The user.
-    :type user: User
+    :param subscriber: The user.
+    :type subscriber: User
     :param getter: The getter to perform the get operation.
     :type getter: SubscriptionGetter
-    :return: A list of all subscriptions by a user.
-    :rtype: list[Subscription]
+    :return: Subscription by a subscriber.
+    :rtype: Subscription
     """
-    return await getter.get_by_user(user)
+    return await getter.get_by_subscriber(subscriber)

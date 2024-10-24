@@ -41,7 +41,7 @@ class SubscriptionGetter(Protocol):
 
     """A protocol for getting subscriptions."""
 
-    async def get_by_username(self, username: Username) -> Subscription:
+    async def get_by_username(self, username: Username) -> Optional[Subscription]:
         """
         Gets a subscription by username.
 
@@ -52,7 +52,7 @@ class SubscriptionGetter(Protocol):
         """
         ...
 
-    async def get_by_id(self, subscription_id: UUID) -> Subscription:
+    async def get_by_id(self, subscription_id: UUID) -> Optional[Subscription]:
         """
         Gets a subscription by ID.
 
@@ -63,14 +63,14 @@ class SubscriptionGetter(Protocol):
         """
         ...
 
-    async def get_by_user(self, user: User) -> list[Subscription]:
+    async def get_by_subscriber(self, subscriber: User) -> Optional[Subscription]:
         """
-        Gets all subscriptions by a user.
+        Get subscription by a subscriber.
 
         :param user: The user.
         :type user: User
-        :return: A list of all subscriptions by a user.
-        :rtype: list[Subscription]
+        :return: Subscription by a subscriber.
+        :rtype: Subscription
         """
         ...
 

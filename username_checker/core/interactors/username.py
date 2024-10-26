@@ -2,7 +2,7 @@ from uuid import UUID
 
 from username_checker.core.entities.subscription import Interval, Subscription, SubscriptionIdGenerator
 from username_checker.core.entities.user import User
-from username_checker.core.entities.username import Username, UsernameIdGenerator, UsernameStatus
+from username_checker.core.entities.username import Username, UsernameIdGenerator
 from username_checker.core.interfaces import username as username_interfaces
 from username_checker.core.interfaces.commiter import Commiter
 from username_checker.core.interfaces.scheduler import Scheduler
@@ -46,10 +46,7 @@ class GetUsername:
             username = Username(
                 id=self.id_generator(),
                 value=value,
-                status=UsernameStatus.NOT_AVAILABLE,
             )
-            new_status = await username_services.check_username(username, self.checker)
-            username.status = new_status
             saved_username = await username_services.upsert_username(username, self.upserter)
             await self.commiter.commit()
             return saved_username
@@ -60,19 +57,31 @@ class CheckUsername:
 
     """Class checking a username status."""
 
-    def __init__(self, checker: username_interfaces.UsernameChecker) -> None:
+    def __init__(
+            self,
+            checker: username_interfaces.UsernameChecker,
+            upserter: username_interfaces.UsernameUpserter,
+            commiter: Commiter,
+    ) -> None:
         self.checker = checker
+        self.upserter = upserter
+        self.commiter = commiter
 
-    async def __call__(self, username: Username) -> UsernameStatus:
+    async def __call__(self, username: Username) -> Username:
         """
         Check username status
 
         :param username: The username to be checked.
         :type username: Username
-        :return: username status
-        :rtype: UsernameStatus
+        :return: username with new status
+        :rtype: Username
         """
-        return await username_services.check_username(username, self.checker)
+        status = await username_services.check_username(username, self.checker)
+        if username.status != status:
+            username.status = status
+            username = await username_services.upsert_username(username, self.upserter)
+            await self.commiter.commit()
+        return username
 
 
 class SubscribeCheckUsername:

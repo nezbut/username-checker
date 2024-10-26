@@ -12,6 +12,7 @@ class UsernameStatus(str, Enum):
 
     AVAILABLE = "available"
     NOT_AVAILABLE = "not_available"
+    UNKNOWN = "unknown"
 
 
 @dataclass
@@ -21,4 +22,4 @@ class Username:
 
     id: UUID
     value: str
-    status: UsernameStatus
+    status: UsernameStatus = UsernameStatus.UNKNOWN

@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 import aiofiles
 from adaptix import dump
+from structlog.stdlib import BoundLogger
 
 from username_checker.core.entities.username import Username
 from username_checker.core.interfaces.uploader import UsernameUploader
@@ -17,8 +18,10 @@ class JSONFileUsernameUploader(UsernameUploader):
 
     """A class responsible for uploading usernames in JSON file."""
 
-    def __init__(self, path: Optional[Union[str, Path]] = None, file_name_generator: Optional[FileNameGenerator] = None) -> None:
-        self._path = Path(path) if path else Path(__file__).parent / "usernames_json"
+    def __init__(self, logger: BoundLogger, *, path: Optional[Union[str, Path]] = None, file_name_generator: Optional[FileNameGenerator] = None) -> None:
+        self.logger = logger
+        self._path = Path(path) if path else Path(
+            __file__).parent / "usernames_json"
         self._file_name_generator = file_name_generator or self._default_file_name_generator()
 
     async def upload(self, usernames: list[Username]) -> str:
@@ -36,6 +39,7 @@ class JSONFileUsernameUploader(UsernameUploader):
         usernames_json = json.dumps(usernames_data)
         async with aiofiles.open(path, "w") as file:
             await file.write(usernames_json)
+            await self.logger.ainfo("Uploaded usernames in JSON file: %s", path)
         return path
 
     def _default_file_name_generator(self) -> FileNameGenerator:

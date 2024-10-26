@@ -52,6 +52,8 @@ class LoggerName(Enum):
     BOT = "bot"
     BROKER = "broker"
     DB = "db"
+    USERNAME_CHECKER = "username_checker"
+    USERNAME_UPLOADER = "username_uploader"
 
 
 @dataclass

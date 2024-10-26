@@ -11,16 +11,16 @@ from username_checker.infrastructure.tkq.factory import (
 
 _settings = Settings.from_dynaconf()
 
-_result_backend = create_tasks_result_backend(_settings)
-_schedule_source = create_schedule_source(_settings)
+result_backend = create_tasks_result_backend(_settings)
+schedule_source = create_schedule_source(_settings)
 
 taskiq_broker: Final[AsyncBroker] = create_tasks_broker(
     _settings,
-).with_result_backend(_result_backend)
+).with_result_backend(result_backend)
 
 taskiq_scheduler: Final[TaskiqScheduler] = TaskiqScheduler(
     broker=taskiq_broker,
-    sources=[_schedule_source],
+    sources=[schedule_source],
 )
 
 

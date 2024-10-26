@@ -18,7 +18,7 @@ class JSONFileUsernameUploader(UsernameUploader):
     """A class responsible for uploading usernames in JSON file."""
 
     def __init__(self, path: Optional[Union[str, Path]] = None, file_name_generator: Optional[FileNameGenerator] = None) -> None:
-        self._path = Path(path) if path else Path(__file__) / "usernames"
+        self._path = Path(path) if path else Path(__file__).parent / "usernames_json"
         self._file_name_generator = file_name_generator or self._default_file_name_generator()
 
     async def upload(self, usernames: list[Username]) -> str:

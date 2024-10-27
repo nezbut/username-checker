@@ -51,7 +51,7 @@ class TTLCacheClient(BaseCacheClient):
         :return: None
         """
         del_key = key.build()
-        del self.cache[del_key]
+        self.cache.pop(del_key, None)
 
     async def close(self) -> None:
         """

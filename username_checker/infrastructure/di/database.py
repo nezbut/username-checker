@@ -70,7 +70,7 @@ class DAOProvider(Provider):
 
     scope = Scope.REQUEST
 
-    holder = provide(HolderDAO, provides=Commiter)
+    holder = provide(HolderDAO, scope=Scope.REQUEST, provides=AnyOf[HolderDAO, Commiter])
 
     @provide
     async def get_subscription_dao(self, holder: HolderDAO) -> AnyOf[

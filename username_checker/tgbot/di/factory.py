@@ -27,9 +27,9 @@ def get_providers() -> list[Provider]:
         *get_broker_providers(),
         *get_i18n_bot_providers(),
         *get_throttling_providers(),
-        *get_proxy_providers(),
         *get_uploader_providers(),
         *get_username_checkers_providers(),
+        *get_proxy_providers(),
     ]
 
 

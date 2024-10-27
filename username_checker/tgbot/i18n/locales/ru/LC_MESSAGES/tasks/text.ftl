@@ -1,0 +1,1 @@
+username-is-available-check-username = {$username} этот ник доступен! Поторопитесь забрать его.

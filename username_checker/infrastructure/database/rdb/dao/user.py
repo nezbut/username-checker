@@ -4,6 +4,7 @@ from adaptix import dump
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from username_checker.core.entities.user import User
 from username_checker.infrastructure.database.rdb.dao.base import BaseDAO
@@ -27,7 +28,8 @@ class UserDAO(BaseDAO[UserORM]):
         :return: The user entity.
         :rtype: User
         """
-        user = await self._get_by_id(user_id)
+        options = (selectinload(self._model.subscriptions),)
+        user = await self._get_by_id(user_id, options=options)
         return user.to_entity() if user else None
 
     async def upsert(self, user: User) -> User:

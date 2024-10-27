@@ -3,8 +3,7 @@ from dishka import AsyncContainer
 from structlog.stdlib import BoundLogger
 
 from username_checker.common.settings import Settings
-from username_checker.core.services.user import to_superusers
-from username_checker.infrastructure.database.rdb.holder import HolderDAO
+from username_checker.infrastructure.proxy.user import UserProxy
 from username_checker.tgbot import handlers, middlewares
 
 
@@ -22,7 +21,6 @@ def setup_dispatcher(dp: Dispatcher, settings: Settings, logger: BoundLogger) ->
 async def init(container: AsyncContainer, settings: Settings, logger: BoundLogger) -> None:
     """Init function."""
     async with container() as req:
-        holder: HolderDAO = await req.get(HolderDAO)
-        await to_superusers(settings.bot.admin.superusers, holder.user)
+        user_proxy: UserProxy = await req.get(UserProxy)
+        await user_proxy.to_superusers(settings.bot.admin.superusers, commit=True)
         await logger.ainfo("Set superusers: %s", settings.bot.admin.superusers)
-        await holder.commit()

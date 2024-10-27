@@ -107,7 +107,7 @@ class RDBSettings:
         default_factory=lambda: SecretStr(value="postgres"))
     host: str = "localhost"
     port: int = 5432
-    db_name: str = "redline"
+    db_name: str = "username_checker"
     echo: bool = False
 
     def make_uri(self) -> SecretStr:

@@ -1,4 +1,5 @@
 from aiogram import Dispatcher
+from aiogram_dialog.api.protocols import BgManagerFactory
 from structlog.stdlib import BoundLogger
 
 from username_checker.common.settings import Settings
@@ -12,12 +13,14 @@ from username_checker.tgbot.middlewares.user import BannedUserMiddleware, TrackU
 
 def setup(
     dp: Dispatcher,
+    bg_manager_factory: BgManagerFactory,
     settings: Settings,
     logger: BoundLogger,
 ) -> None:
     """Setup middlewares."""
     dp.update.outer_middleware(
         InitMiddleware(
+            bg_manager_factory=bg_manager_factory,
             settings=settings,
         ),
     )

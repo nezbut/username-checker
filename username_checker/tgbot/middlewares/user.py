@@ -9,6 +9,7 @@ from aiogram.types import CallbackQuery, Message, TelegramObject
 from username_checker.core.entities.user import LanguageLocale, User
 from username_checker.core.services import user as user_service
 from username_checker.infrastructure.clients.cache.key import UserCacheKey
+from username_checker.infrastructure.proxy.user import CurrentUserProxy
 from username_checker.tgbot.utils.data import MiddlewareData
 
 
@@ -53,17 +54,21 @@ class TrackUserMiddleware(BaseMiddleware):
             else:
                 await logger.adebug("Update user. id=%s, username=%s", *user_data)
                 user_from_db.username = user_aiogram.username or user_aiogram.first_name
-                user_from_db.language = LanguageLocale(
-                    user_aiogram.language_code or "en",
-                )
                 user_from_db.last_activity = datetime.now(UTC)
             await user_service.upsert_user(user_from_db, holder.user)
             await holder.commit()
             await logger.adebug("Upsert user in database. id=%s, username=%s", *user_data)
             await cache.set(user_cache_key, dump(user_from_db))
             await logger.adebug("Set user in cache. id=%s, username=%s", *user_data)
+            current_user = user_from_db
         else:
             await logger.adebug("User is in cache. id=%s, username=%s", *user_data)
+            current_user = load(user_from_cache, User)
+
+        data["current_user"] = CurrentUserProxy(
+            user=current_user,
+            user_proxy=data["user_proxy"],
+        )
         return await handler(event, data)
 
 
@@ -78,20 +83,9 @@ class BannedUserMiddleware(BaseMiddleware):
         data: MiddlewareData,
     ) -> Any:
         """Banned user middleware."""
-        cache = data["cache"]
-        holder = data["holder_dao"]
-        user_aiogram = data["event_from_user"]
+        current_user = data["current_user"]
         i18n = data["i18n"]
-        cache_key = UserCacheKey(user_id=user_aiogram.id)
 
-        user_from_cache: Optional[dict[str, Any]] = await cache.get(cache_key)
-        if user_from_cache:
-            user = load(user_from_cache, User)
-        else:
-            user_from_db = await user_service.get_by_id(user_aiogram.id, holder.user)
-            if not user_from_db:
-                return await handler(event, data)
-            user = user_from_db
-        if user.is_banned:
+        if current_user.user.is_banned:
             return event.answer(i18n.get("user-banned-text"))
         return await handler(event, data)

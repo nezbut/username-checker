@@ -3,6 +3,7 @@ name: BuildPushUsernameChecker
 on:
   push:
     tags:
+      - "*.*.*"
       - "*.*.*-*"
 
 jobs:

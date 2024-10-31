@@ -61,6 +61,10 @@ class InitMiddleware(BaseMiddleware):
         data["holder_dao"] = await container.get(HolderDAO)
         data["cache"] = await container.get(BaseCacheClient)
         data["throttle_manager"] = await container.get(ThrottleManager)
-        data["user_proxy"] = await container.get(UserProxy)
+        data["user_proxy"] = UserProxy(
+            dao=data["holder_dao"].user,
+            cache=data["cache"],
+            commiter=data["holder_dao"],
+        )
 
         return await handler(event, data)

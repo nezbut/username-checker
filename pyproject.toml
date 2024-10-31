@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "username-checker"
-version = "0.0.0"
+version = "0.1.0"
 description = ""
 authors = ["NezBut <xyi12312354@mail.ru>"]
 readme = "README.md"
@@ -21,6 +21,9 @@ asyncpg = "^0.29.0"
 adaptix = "^3.0.0b8"
 types-cachetools = "^5.5.0.20240820"
 types-aiofiles = "^24.1.0.20240626"
+cachetools = "^5.5.0"
+aiogram-dialog = "^2.2.0"
+brotli = "^1.1.0"
 
 [tool.poetry.group.test]
 optional = true

@@ -72,4 +72,4 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         if throttled.exceeded_count <= MAX_EXCEEDED_COUNT:
             await logger.ainfo("Throttled: user_id=%s, chat_id=%s, delta=%s", data["event_from_user"].id, data["event_chat"].id, delta)
-            await event.answer(i18n.get("throttling-try-again", seconds=f"{delta:.2f}"))
+            await event.answer(i18n.get("throttling-try-again-text-user", seconds=f"{delta:.2f}"))

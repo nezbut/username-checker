@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import uuid4
 
 from dishka import AsyncContainer, Provider, Scope, make_async_container, provide
 from dishka.integrations.taskiq import setup_dishka
@@ -6,7 +7,9 @@ from nats.js.api import ConsumerConfig, StreamConfig
 from taskiq_nats import PullBasedJetStreamBroker, PushBasedJetStreamBroker  # type: ignore[import-untyped]
 
 from username_checker.common.settings import Settings
-from username_checker.core.interactors import username
+from username_checker.core.entities.subscription import SubscriptionIdGenerator
+from username_checker.core.entities.username import UsernameIdGenerator
+from username_checker.core.interactors import subscription, username
 from username_checker.infrastructure.di.broker import get_broker_providers
 from username_checker.infrastructure.di.checker import get_username_checkers_providers
 from username_checker.infrastructure.di.clients import get_clients_providers
@@ -22,7 +25,23 @@ from username_checker.tgbot.di.throttling import get_throttling_providers
 
 class _OverrideProvider(Provider):
 
-    check_username = provide(username.CheckUsername, scope=Scope.REQUEST)
+    scope = Scope.REQUEST
+
+    get_user_subscriptions = provide(subscription.GetUserSubscriptions)
+
+    get_username = provide(username.GetUsername)
+    check_username = provide(username.CheckUsername)
+    upload_available_usernames = provide(username.UploadAvailableUsernames)
+
+    @provide(scope=Scope.APP)
+    async def get_username_id_generator(self) -> UsernameIdGenerator:
+        """Returns a username id generator."""
+        return uuid4
+
+    @provide(scope=Scope.APP)
+    async def get_subscription_id_generator(self) -> SubscriptionIdGenerator:
+        """Returns a subscription id generator."""
+        return uuid4
 
 
 def _create_override_container(settings: Settings) -> AsyncContainer:

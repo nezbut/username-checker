@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from nats.js.api import KeyValueConfig
 
 from username_checker.common.settings.models.security import SecretStr
@@ -23,7 +24,7 @@ class BotProperties:
 
     """A class representing the bot properties."""
 
-    parse_mode: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
     disable_notification: Optional[bool] = None
     protect_content: Optional[bool] = None
     allow_sending_without_reply: Optional[bool] = None

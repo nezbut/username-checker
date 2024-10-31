@@ -8,8 +8,8 @@ class ProxyProvider(Provider):
 
     """Provider for proxies."""
 
-    user_proxy = provide(UserProxy, scope=Scope.REQUEST, provides=AnyOf[
-        ui.UserGetter, ui.UserUpdater, ui.UserUpserter,
+    user_proxy_class = provide(UserProxy, scope=Scope.REQUEST, provides=AnyOf[
+        UserProxy, ui.UserGetter, ui.UserUpdater, ui.UserUpserter,
     ])
 
 

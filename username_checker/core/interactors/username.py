@@ -1,3 +1,4 @@
+from pathlib import Path
 from uuid import UUID
 
 from username_checker.core.entities.subscription import Interval, Subscription, SubscriptionIdGenerator
@@ -22,6 +23,7 @@ class GetUsername:
             id_generator: UsernameIdGenerator,
             getter: username_interfaces.UsernameGetter,
             upserter: username_interfaces.UsernameUpserter,
+            inspector: username_interfaces.UsernameInspector,
             commiter: Commiter,
     ) -> None:
         self.checker = checker
@@ -29,8 +31,9 @@ class GetUsername:
         self.upserter = upserter
         self.getter = getter
         self.commiter = commiter
+        self.inspector = inspector
 
-    async def __call__(self, value: str) -> Username:
+    async def __call__(self, value: str, recipient: User) -> Username:
         """
         Retrieves a username by its value. If the username does not exist,
 
@@ -48,8 +51,13 @@ class GetUsername:
                 value=value,
             )
             saved_username = await username_services.upsert_username(username, self.upserter)
+            await username_services.add_to_used(recipient, saved_username, self.upserter)
             await self.commiter.commit()
             return saved_username
+
+        if not await username_services.have_used(recipient, username, self.inspector):
+            await username_services.add_to_used(recipient, username, self.upserter)
+            await self.commiter.commit()
         return username
 
 
@@ -107,7 +115,7 @@ class SubscribeCheckUsername:
         :param subscriber: The user subscribing to the check.
         :type subscriber: User
         :param username: The username to be checked.
-        :type username: str
+        :type username: Username
         :param interval: The interval at which the username should be checked.
         :type interval: Interval
         :return: The result of the scheduled username check.
@@ -154,12 +162,14 @@ class UploadAvailableUsernames:
         self.uploader = uploader
         self.getter = getter
 
-    async def __call__(self, user: User) -> str:
+    async def __call__(self, user: User) -> Path:
         """
         Uploads available usernames.
 
         :param usernames: List of available usernames.
         :type usernames: list[str]
+        :return: path to uploaded
+        :rtype: Path
         """
         usernames = await username_services.get_available_usernames_for_user(user, self.getter)
         return await self.uploader.upload(usernames)

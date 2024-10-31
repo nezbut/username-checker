@@ -52,6 +52,17 @@ class UsernameUpserter(Protocol):
         """
         ...
 
+    async def add_to_used(self, user: User, username: Username) -> None:
+        """
+        Adds a username to the used usernames of a user.
+
+        :param user: The user to add the username to.
+        :type user: User
+        :param username: The username to add.
+        :type username: Username
+        """
+        ...
+
 
 class UsernameGetter(Protocol):
 

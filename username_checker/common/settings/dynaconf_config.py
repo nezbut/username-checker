@@ -10,5 +10,5 @@ def _lowercase_keys(d: dict) -> dict:
         return d
 
 
-_dyna = Dynaconf(envvar_prefix="REDLINE")
+_dyna = Dynaconf(envvar_prefix="USERNAME_CHECKER")
 dynaconf_settings = _lowercase_keys(_dyna.as_dict())

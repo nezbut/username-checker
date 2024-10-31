@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from username_checker.core.entities.user import User
 from username_checker.core.entities.username import Username, UsernameStatus
 from username_checker.infrastructure.database.rdb.dao.base import BaseDAO
-from username_checker.infrastructure.database.rdb.models import UsernameORM, UserORM
+from username_checker.infrastructure.database.rdb.models import AssociationUsernameUser, UsernameORM, UserORM
 
 
 class UsernameDAO(BaseDAO[UsernameORM]):
@@ -30,14 +30,29 @@ class UsernameDAO(BaseDAO[UsernameORM]):
         :return: bool
         """
         stmt = (
-            select(self._model)
+            select(AssociationUsernameUser)
             .where(
-                self._model.id == username.id,
-                self._model.used_usernames_by.any(UserORM.id == user.id),
+                AssociationUsernameUser.user_id == user.id,
+                AssociationUsernameUser.username_id == username.id,
             )
         )
         result = await self.session.execute(stmt)
-        return bool(result.scalars().all())
+        return bool(result.scalar())
+
+    async def add_to_used(self, user: User, username: Username) -> None:
+        """
+        Adds a username to the used usernames of a user.
+
+        :param user: The user to add the username to.
+        :type user: User
+        :param username: The username to add.
+        :type username: Username
+        """
+        new_assoc = AssociationUsernameUser(
+            username_id=username.id,
+            user_id=user.id,
+        )
+        self._add(new_assoc)
 
     async def get_by_id(self, username_id: UUID) -> Optional[Username]:
         """
@@ -76,7 +91,12 @@ class UsernameDAO(BaseDAO[UsernameORM]):
         :param value: The value of the username to retrieve.
         :return: The retrieved username.
         """
-        ...
+        stmt = (
+            select(self._model)
+            .where(self._model.value == value)
+        )
+        username = await self.session.scalar(stmt)
+        return username.to_entity() if username else None
 
     async def get_used_usernames(self, user: User) -> list[Username]:
         """
@@ -105,7 +125,7 @@ class UsernameDAO(BaseDAO[UsernameORM]):
             select(self._model)
             .where(
                 self._model.status == UsernameStatus.AVAILABLE,
-                self._model.used_usernames_by.notany(UserORM.id == user.id),
+                self._model.used_usernames_by.any(UserORM.id == user.id),
             )
         )
         result = await self.session.scalars(stmt)

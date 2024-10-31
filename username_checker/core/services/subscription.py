@@ -34,7 +34,7 @@ async def delete_subscription(subscription_id: UUID, deleter: interfaces.Subscri
     return await deleter.delete(subscription_id)
 
 
-async def get_by_username(username: Username, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
+async def get_by_username(username: Username, getter: interfaces.SubscriptionGetter) -> list[Subscription]:
     """
     Gets a subscription by username using the provided getter.
 
@@ -42,8 +42,8 @@ async def get_by_username(username: Username, getter: interfaces.SubscriptionGet
     :type username: Username
     :param getter: The getter to perform the get operation.
     :type getter: SubscriptionGetter
-    :return: The subscription.
-    :rtype: Subscription
+    :return: The subscriptions.
+    :rtype: list[Subscription]
     """
     return await getter.get_by_username(username)
 
@@ -76,7 +76,7 @@ async def get_subscriptions(getter: interfaces.SubscriptionGetter, subscription_
     return await getter.get_subscriptions(subscription_ids)
 
 
-async def get_by_subscriber(subscriber: User, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
+async def get_by_subscriber(subscriber: User, getter: interfaces.SubscriptionGetter) -> list[Subscription]:
     """
     Get subscription by a subscriber.
 
@@ -84,7 +84,21 @@ async def get_by_subscriber(subscriber: User, getter: interfaces.SubscriptionGet
     :type subscriber: User
     :param getter: The getter to perform the get operation.
     :type getter: SubscriptionGetter
-    :return: Subscription by a subscriber.
-    :rtype: Subscription
+    :return: Subscriptions by a subscriber.
+    :rtype: list[Subscription]
     """
     return await getter.get_by_subscriber(subscriber)
+
+
+async def get_by_subscriber_and_username(subscriber: User, username: Username, getter: interfaces.SubscriptionGetter) -> Optional[Subscription]:
+    """
+    Get subscription by a subscriber and username.
+
+    :param subscriber: The user.
+    :type subscriber: User
+    :param username: The username.
+    :type username: Username
+    :return: The subscription.
+    :rtype: Subscription
+    """
+    return await getter.get_by_subscriber_and_username(subscriber, username)

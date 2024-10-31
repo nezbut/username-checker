@@ -22,9 +22,10 @@ class JSONFileUsernameUploader(UsernameUploader):
         self.logger = logger
         self._path = Path(path) if path else Path(
             __file__).parent / "usernames_json"
+        self._path.mkdir(parents=True, exist_ok=True)
         self._file_name_generator = file_name_generator or self._default_file_name_generator()
 
-    async def upload(self, usernames: list[Username]) -> str:
+    async def upload(self, usernames: list[Username]) -> Path:
         """
         Uploads a list of usernames.
 
@@ -34,12 +35,13 @@ class JSONFileUsernameUploader(UsernameUploader):
         :rtype: str
         """
         file_name = self._file_name_generator()
-        path = str(self._path / file_name)
+        path = self._path / file_name
+        str_path = str(path)
         usernames_data = [dump(username) for username in usernames]
         usernames_json = json.dumps(usernames_data)
-        async with aiofiles.open(path, "w") as file:
+        async with aiofiles.open(str_path, "w") as file:
             await file.write(usernames_json)
-            await self.logger.ainfo("Uploaded usernames in JSON file: %s", path)
+            await self.logger.ainfo("Uploaded usernames in JSON file: %s", str_path)
         return path
 
     def _default_file_name_generator(self) -> FileNameGenerator:

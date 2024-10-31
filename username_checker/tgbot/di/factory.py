@@ -5,6 +5,7 @@ from username_checker.infrastructure.di.broker import get_broker_providers
 from username_checker.infrastructure.di.checker import get_username_checkers_providers
 from username_checker.infrastructure.di.clients import get_clients_providers
 from username_checker.infrastructure.di.database import get_database_providers
+from username_checker.infrastructure.di.interactors import get_interactors_providers
 from username_checker.infrastructure.di.logs import get_logging_providers
 from username_checker.infrastructure.di.proxy import get_proxy_providers
 from username_checker.infrastructure.di.settings import get_settings_providers
@@ -30,6 +31,7 @@ def get_providers() -> list[Provider]:
         *get_uploader_providers(),
         *get_username_checkers_providers(),
         *get_proxy_providers(),
+        *get_interactors_providers(),
     ]
 
 

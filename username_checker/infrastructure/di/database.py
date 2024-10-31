@@ -1,11 +1,17 @@
 from collections.abc import AsyncIterable
 
-from dishka import Provider, Scope, provide
+from dishka import AnyOf, Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from username_checker.common.log.configuration import LoggerName
 from username_checker.common.log.installer import LoggersInstaller
 from username_checker.common.settings.models.db import RDBSettings
+from username_checker.core.interfaces import subscription as si
+from username_checker.core.interfaces import username as uni
+from username_checker.core.interfaces.commiter import Commiter
+from username_checker.infrastructure.database.rdb.dao.subscription import SubscriptionDAO
+from username_checker.infrastructure.database.rdb.dao.user import UserDAO
+from username_checker.infrastructure.database.rdb.dao.username import UsernameDAO
 from username_checker.infrastructure.database.rdb.factory import create_engine, create_session_maker
 from username_checker.infrastructure.database.rdb.holder import HolderDAO
 from username_checker.infrastructure.database.rdb.tm import TransactionManager
@@ -62,7 +68,29 @@ class DAOProvider(Provider):
 
     """Provider for DAO objects."""
 
-    holder = provide(HolderDAO, scope=Scope.REQUEST)
+    scope = Scope.REQUEST
+
+    holder = provide(HolderDAO, scope=Scope.REQUEST,
+                     provides=AnyOf[HolderDAO, Commiter])
+
+    @provide
+    async def get_subscription_dao(self, holder: HolderDAO) -> AnyOf[
+        SubscriptionDAO, si.SubscriptionDeleter, si.SubscriptionGetter, si.SubscriptionUpserter,
+    ]:
+        """Get the subscription DAO."""
+        return holder.subscription
+
+    @provide
+    async def get_user_dao(self, holder: HolderDAO) -> UserDAO:
+        """Get the user DAO."""
+        return holder.user
+
+    @provide
+    async def get_username_dao(self, holder: HolderDAO) -> AnyOf[
+        UsernameDAO, uni.UsernameDeleter, uni.UsernameGetter, uni.UsernameInspector, uni.UsernameUpserter,
+    ]:
+        """Get the username DAO."""
+        return holder.username
 
 
 def get_database_providers() -> list[Provider]:

@@ -2,7 +2,7 @@ import asyncio
 from types import TracebackType
 from typing import Any, Optional
 
-from aiohttp import ClientResponse, ClientSession
+from aiohttp import ClientSession
 from aiohttp.hdrs import USER_AGENT
 from structlog.stdlib import BoundLogger
 
@@ -29,15 +29,16 @@ class TelegramUsernameChecker(UsernameChecker):
         :return: username status
         :rtype: UsernameStatus
         """
-        response = await self._fragment_request(username.value)
-
         try:
-            json_data = await response.json()
+            json_data = await self._fragment_request(username.value)
         except ValueError:
+            await self._logger.adebug("Return status: %s", UsernameStatus.UNKNOWN)
             return UsernameStatus.UNKNOWN
 
         if "h" not in json_data:
+            await self._logger.adebug("Return status: %s", UsernameStatus.AVAILABLE)
             return UsernameStatus.AVAILABLE
+        await self._logger.adebug("Return status: %s", UsernameStatus.NOT_AVAILABLE)
         return UsernameStatus.NOT_AVAILABLE
 
     async def close(self) -> None:
@@ -52,17 +53,18 @@ class TelegramUsernameChecker(UsernameChecker):
         self._session = self._session_or_none or ClientSession(
             base_url=self._base_url,
             headers={
-                USER_AGENT: "username_checker/tg_checker",
+                USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
             },
         )
         await self._logger.ainfo(log_msg)
         return self
 
-    async def _fragment_request(self, username: str) -> ClientResponse:
+    async def _fragment_request(self, username: str) -> Any:
         headers = self._headers(username)
         url = f"/username/{username}"
         async with self._session.get(url, headers=headers) as response:
-            return response
+            await self._logger.ainfo("New response status: %s to %s. Reason: %s", response.status, f"{self._base_url}{url}", response.reason)
+            return await response.text()
 
     async def __aexit__(self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], exc_tb: Optional[TracebackType]) -> None:
         """Asynchronous context manager exit point."""

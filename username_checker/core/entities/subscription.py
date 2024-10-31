@@ -1,12 +1,10 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
 from uuid import UUID
 
-if TYPE_CHECKING:
-    from username_checker.core.entities.user import User
-    from username_checker.core.entities.username import Username
+from username_checker.core.entities.user import User
+from username_checker.core.entities.username import Username
 
 SubscriptionIdGenerator = Callable[[], UUID]
 
@@ -15,10 +13,10 @@ class Interval(Enum):
 
     """Represents a time interval."""
 
-    MINUTE = "1m"
-    MINUTE_30 = "30m"
-    HOUR = "1h"
-    DAY = "1d"
+    MINUTE_1 = 60
+    MINUTE_30 = 1800
+    HOUR_1 = 3600
+    DAY_1 = 86400
 
 
 @dataclass
@@ -27,6 +25,6 @@ class Subscription:
     """Represents a subscription"""
 
     id: UUID
-    username: "Username"
+    username: Username
     interval: Interval
-    subscriber: "User"
+    subscriber: User

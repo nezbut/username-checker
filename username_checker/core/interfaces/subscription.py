@@ -41,14 +41,14 @@ class SubscriptionGetter(Protocol):
 
     """A protocol for getting subscriptions."""
 
-    async def get_by_username(self, username: Username) -> Optional[Subscription]:
+    async def get_by_username(self, username: Username) -> list[Subscription]:
         """
         Gets a subscription by username.
 
         :param username: The username of the subscription.
         :type username: Username
-        :return: The subscription.
-        :rtype: Subscription
+        :return: The subscriptions.
+        :rtype: list[Subscription]
         """
         ...
 
@@ -63,13 +63,26 @@ class SubscriptionGetter(Protocol):
         """
         ...
 
-    async def get_by_subscriber(self, subscriber: User) -> Optional[Subscription]:
+    async def get_by_subscriber(self, subscriber: User) -> list[Subscription]:
         """
         Get subscription by a subscriber.
 
         :param user: The user.
         :type user: User
-        :return: Subscription by a subscriber.
+        :return: Subscriptions by a subscriber.
+        :rtype: list[Subscription]
+        """
+        ...
+
+    async def get_by_subscriber_and_username(self, subscriber: User, username: Username) -> Optional[Subscription]:
+        """
+        Get subscription by a subscriber and username.
+
+        :param subscriber: The user.
+        :type subscriber: User
+        :param username: The username.
+        :type username: Username
+        :return: The subscription.
         :rtype: Subscription
         """
         ...

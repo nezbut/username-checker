@@ -119,3 +119,17 @@ async def have_used(user: User, username: Username, inspector: interfaces.Userna
     :return: bool
     """
     return await inspector.have_used(user, username)
+
+
+async def add_to_used(user: User, username: Username, upserter: interfaces.UsernameUpserter) -> None:
+    """
+    Adds a username to the used usernames of a user.
+
+    :param user: The user to add the username to.
+    :type user: User
+    :param username: The username to add.
+    :type username: Username
+    :param upserter: The upserter to use for adding the username.
+    :type upserter: interfaces.UsernameUpserter
+    """
+    return await upserter.add_to_used(user, username)

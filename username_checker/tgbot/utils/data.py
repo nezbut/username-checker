@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Concatenate, TypedDict
+from typing import Any, Concatenate, TypedDict, cast
 
 from aiogram import Bot, Router, types
 from aiogram.dispatcher.event.handler import HandlerObject
@@ -16,12 +16,39 @@ from username_checker.common.settings import Settings
 from username_checker.common.settings.models import broker, cache, db, logs, telegram
 from username_checker.core.interactors import subscription as sub_interactors
 from username_checker.core.interactors import username as username_interactors
+from username_checker.core.interfaces import commiter as commiter_i
+from username_checker.core.interfaces import scheduler as scheduler_i
+from username_checker.core.interfaces import subscription, user, username
+from username_checker.core.interfaces import uploader as uploader_i
 from username_checker.infrastructure.clients.cache.base import BaseCacheClient
 from username_checker.infrastructure.database.rdb.holder import HolderDAO
 from username_checker.infrastructure.proxy.user import CurrentUserProxy, UserProxy
 from username_checker.tgbot.throttling.manager import ThrottleManager
 
 I18NGetter = Callable[Concatenate[...], str]
+
+
+class InterfacesMiddlewareData(TypedDict, total=False):
+
+    """A dictionary containing middleware data for interfaces."""
+
+    commiter_i: commiter_i.Commiter
+    scheduler_i: scheduler_i.Scheduler
+    username_checker_i: username.UsernameChecker
+    uploader_i: uploader_i.UsernameUploader
+
+    sub_getter_i: subscription.SubscriptionGetter
+    sub_upserter_i: subscription.SubscriptionUpserter
+    sub_deleter_i: subscription.SubscriptionDeleter
+
+    user_getter_i: user.UserGetter
+    user_updater_i: user.UserUpdater
+    user_upserter_i: user.UserUpserter
+
+    username_getter_i: username.UsernameGetter
+    username_deleter_i: username.UsernameDeleter
+    username_inspector_i: username.UsernameInspector
+    username_upserter_i: username.UsernameUpserter
 
 
 class AiogramMiddlewareData(TypedDict, total=False):
@@ -90,7 +117,7 @@ class InteractorsMiddlewareData(TypedDict, total=False):
     upload_available_usernames: username_interactors.UploadAvailableUsernames
 
 
-class MiddlewareData(AiogramMiddlewareData, DialogMiddlewareData, SettingsMiddlewareData, InteractorsMiddlewareData, total=False):
+class MiddlewareData(AiogramMiddlewareData, DialogMiddlewareData, SettingsMiddlewareData, InteractorsMiddlewareData, InterfacesMiddlewareData, total=False):
 
     """Middleware data for aiogram."""
 
@@ -107,3 +134,8 @@ class MiddlewareData(AiogramMiddlewareData, DialogMiddlewareData, SettingsMiddle
     i18n_getter: I18NGetter
 
     logger: BoundLogger
+
+
+def get_middleware_data(data: dict[str, Any]) -> MiddlewareData:
+    """Get middleware data."""
+    return cast(MiddlewareData, data)

@@ -36,14 +36,14 @@ class SubscriptionDAO(BaseDAO[SubscriptionORM]):
         subscription = await self._get_by_id(subscription_id, options=options)
         return subscription.to_entity() if subscription else None
 
-    async def get_by_username(self, username: Username) -> Optional[Subscription]:
+    async def get_by_username(self, username: Username) -> list[Subscription]:
         """
         Gets a subscription by username.
 
         :param username: The username of the subscription.
         :type username: Username
         :return: The subscription.
-        :rtype: Subscription
+        :rtype: list[Subscription]
         """
         stmt = (
             select(self._model)
@@ -54,19 +54,17 @@ class SubscriptionDAO(BaseDAO[SubscriptionORM]):
             .where(self._model.username_id == username.id)
         )
         result = await self.session.execute(stmt)
-        sub = result.scalar_one_or_none()
-        if sub is not None:
-            return sub.to_entity()
-        return sub
+        subs = result.scalars().all()
+        return [subscription.to_entity() for subscription in subs]
 
-    async def get_by_subscriber(self, subscriber: User) -> Optional[Subscription]:
+    async def get_by_subscriber(self, subscriber: User) -> list[Subscription]:
         """
-        Get subscription by a subscriber.
+        Get subscriptions by a subscriber.
 
-        :param user: The user.
-        :type user: User
-        :return: Subscription by a subscriber.
-        :rtype: Subscription
+        :param subscriber: The subscriber.
+        :type subscriber: User
+        :return: Subscriptions by a subscriber.
+        :rtype: list[Subscription]
         """
         stmt = (
             select(self._model)
@@ -77,10 +75,32 @@ class SubscriptionDAO(BaseDAO[SubscriptionORM]):
             .where(self._model.subscriber_id == subscriber.id)
         )
         result = await self.session.execute(stmt)
-        sub = result.scalar_one_or_none()
-        if sub is not None:
-            return sub.to_entity()
-        return sub
+        subs = result.scalars().all()
+        return [subscription.to_entity() for subscription in subs]
+
+    async def get_by_subscriber_and_username(self, subscriber: User, username: Username) -> Optional[Subscription]:
+        """
+        Get subscription by a subscriber and username.
+
+        :param subscriber: The user.
+        :type subscriber: User
+        :param username: The username.
+        :type username: Username
+        :return: The subscription.
+        :rtype: Subscription
+        """
+        stmt = (
+            select(self._model)
+            .options(
+                selectinload(self._model.subscriber),
+                selectinload(self._model.username),
+            )
+            .where(self._model.subscriber_id == subscriber.id)
+            .where(self._model.username_id == username.id)
+        )
+        result = await self.session.execute(stmt)
+        subscription = result.scalar_one_or_none()
+        return subscription.to_entity() if subscription else None
 
     async def get_subscriptions(self, subscription_ids: Optional[list[UUID]] = None) -> list[Subscription]:
         """
@@ -112,7 +132,7 @@ class SubscriptionDAO(BaseDAO[SubscriptionORM]):
         :return: The upserted subscription.
         :rtype: Subscription
         """
-        kwargs = dump(subscription)
+        kwargs: dict = dump(subscription)
         kwargs["interval"] = subscription.interval
         kwargs["subscriber_id"] = kwargs.pop("subscriber")["id"]
         kwargs["username_id"] = kwargs.pop("username")["id"]
@@ -124,9 +144,11 @@ class SubscriptionDAO(BaseDAO[SubscriptionORM]):
                 index_elements=(
                     self._model.id,), set_=kwargs, where=self._model.id == subscription.id,
             )
-            .returning(self._model),
+            .returning(self._model.interval),
         )
-        return saved_subscription.scalar_one().to_entity()
+        new_interval = saved_subscription.scalar_one()
+        subscription.interval = new_interval
+        return subscription
 
     async def delete(self, subscription_id: UUID) -> bool:
         """

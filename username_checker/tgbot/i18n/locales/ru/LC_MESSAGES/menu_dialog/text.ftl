@@ -1,0 +1,1 @@
+main-menu-text-menu-dialog = Главное меню

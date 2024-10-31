@@ -51,13 +51,13 @@ class SchedulerImpl(Scheduler):
 
     def _get_cron(self, interval: Interval) -> CronSpec:
         match interval:
-            case Interval.MINUTE:
+            case Interval.MINUTE_1:
                 cron = CronSpec()
             case Interval.MINUTE_30:
                 cron = CronSpec(minutes="*/30")
-            case Interval.HOUR:
+            case Interval.HOUR_1:
                 cron = CronSpec(minutes="0")
-            case Interval.DAY:
+            case Interval.DAY_1:
                 cron = CronSpec(minutes="0", hours="0")
             case _:
                 cron = CronSpec()

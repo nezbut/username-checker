@@ -19,7 +19,8 @@ class SubscriptionORM(Base[Subscription]):
     __tablename__ = "subscription"
 
     id: Mapped[id_uuid]
-    interval: Mapped[Interval] = mapped_column(Enum(Interval), nullable=False)
+    interval: Mapped[Interval] = mapped_column(
+        Enum(Interval, name="check_int"), nullable=False)
 
     subscriber_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     subscriber: Mapped["UserORM"] = relationship(
